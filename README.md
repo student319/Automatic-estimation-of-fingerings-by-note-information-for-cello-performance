@@ -2,6 +2,7 @@
 
 本リポジトリは、チェロ演奏における最適な運指を楽譜情報から自動推定する深層学習モデルの実装を公開したものです。  
 ヴァイオリンの運指パターンで事前学習を行い、それを転移学習・ファインチューニングすることでチェロへの適用を図っています。
+本研究成果は、2025年5月に開催された「**電子情報通信学会 イメージ・メディア・クオリティ研究会（IEICE-IMQ）**」にて発表を行いました。
 
 ## 概要
 
@@ -41,17 +42,22 @@ project-root/
 git clone https://github.com/your-username/cello-fingering-estimation.git  
 cd cello-fingering-estimation  
 pip install -r requirements.txt
-
+```
 
 ## 実行方法  
 
+```bash
 python main.py
-
+```
 
 ## データセット
 
 - 事前学習用：TNUA Violin Fingering Dataset
 - 転移学習・評価用：デュポール「チェロ奏法と21の練習曲」に基づき自作したデータセット
+
+
+## 学会発表：  
+[IEICE-IMQ 研究会 プログラム（2025年5月）](https://ken.ieice.org/ken/program/index.php?tgs_regid=29051ffd263895bed9d2b9d591ba66c06956421ef30b5393bfa12d1b707d3f7a&tgid=IEICE-IMQ)
 
 
 ## 引用・参考文献
