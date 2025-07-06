@@ -1,0 +1,8 @@
+Results for 0:
+Accuracy (Exact Match): 100.00%
+Accuracy (Exact Match, True): 100.00%
+
+Total hand movement distance (pred): 340.2413592553571
+Total hand movement count (pred): 90
+Total hand movement distance (true): 70.41865346549781
+Total hand movement count (true): 17
