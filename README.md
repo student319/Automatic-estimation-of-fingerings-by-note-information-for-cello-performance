@@ -23,11 +23,11 @@
 
 project-root/  
   
-├── dataset/　　　　　　　　　　　　　# データセットおよびファイル形式変換コード  
+├── dataset/　　　　　　　　# データセットおよびファイル形式変換コード  
 &nbsp;&nbsp; ├── tocsv.py　　　　　　# musicXML -> csv  
 &nbsp;&nbsp; ├── make_pickle.py　　　# csv -> pickle  
 &nbsp;&nbsp; └── データセット（csv）  # チェロ用の自作データセット  
-├── program/ # ソースコード  
+├── program/　　　　　　　　# ソースコード  
 &nbsp;&nbsp; ├── main.py　　　　　　　# 実行ファイル  
 &nbsp;&nbsp; ├── custom_layers.py　　# カスタム層の定義  
 &nbsp;&nbsp; └── dataset_prepare.py　# データ前処理  
