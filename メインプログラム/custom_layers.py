@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Custom layers for proposed model in "Semi-supervised Violin Finger Generation Using Variational Autoencoders" by Vincent K.M. Cheung, Hsuan-Kai Kao, and Li Su in Proc. of the 22nd Int. Society for Music Information Retrieval Conf., Online, 2021.
+Code below is modified from original code by "Semi-supervised Violin Finger Generation Using Variational Autoencoders" by Vincent K.M. Cheung, Hsuan-Kai Kao, and Li Su in Proc. of the 22nd Int. Society for Music Information Retrieval Conf., Online, 2021.
 
 """
 
@@ -23,7 +23,7 @@ class Sampling(layers.Layer):
                     
         return z_mean + keras.backend.exp(z_log_var/2.)*epsilon
     
-    #warning解除のため追加
+    #to avoid warning
     def compute_mask(self, inputs, mask=None):
         return mask  # pass the mask along to the next layers
 
@@ -46,7 +46,7 @@ class KLDivergenceLayer(layers.Layer):
         #self.add_metric(kl_loss, name='kl_loss', aggregation='mean')   
         return inputs
     
-    #warning解除のため追加
+    #to avoid warning
     def compute_mask(self, inputs, mask=None):
         return mask  # pass the mask along to the next layers
 
@@ -80,7 +80,7 @@ class GumbelSoftmaxLayer(layers.Layer):
       temperature = 0.75
       y = gumbel_softmax_sample(inputs, temperature)
       return y
-    #warning解除のため追加
+    #to avoid warning
     def compute_mask(self, inputs, mask=None):
         return mask  # pass the mask along to the next layers
     
@@ -103,6 +103,6 @@ class GumbelKLDivergenceLayer(layers.Layer):
         self.add_loss(kl_loss) #deleted , inputs = inputs
         #self.add_metric(kl_loss, name='gumbel_kl_loss', aggregation='mean')   
         return inputs    
-    #warning解除のため追加
+    #to avoid warning
     def compute_mask(self, inputs, mask=None):
         return mask  # pass the mask along to the next layers

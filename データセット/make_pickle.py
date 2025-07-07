@@ -1,3 +1,7 @@
+"""
+このコードはpickle形式のファイルを生成するために使用したコードです
+"""
+
 import csv
 import pickle
 import numpy as np
@@ -26,7 +30,6 @@ csv_files = [
 ]
 
 # dtypeの定義（7フィールド）
-# 注意！元のデータは4つ余分な要素を含んでいるため、makedata(train, test)を使えない
 dtype = [
     ('pitch', '<i4'),
     ('start', '<f8'),
@@ -54,17 +57,16 @@ for csv_file in csv_files:
 
     testing = 1
     if testing == 1:
-        #testing
+        #test data
         # 32音符ごとにチャンク分割し、不足を指定の値で埋める
         chunks = []
         for i in range(0, len(data_list), 32):
             chunk = data_list[i:i + 32]
             while len(chunk) < 32:
-                chunk.append((35, 3.0, 3.0, 3, 3, 3, 0))  # 最初は54、他は3で埋める
+                chunk.append((35, 3.0, 3.0, 3, 3, 3, 0)) 
             chunks.append(chunk)
     else:
-        #training
-        # ホップサイズとチャンクサイズ
+        #training data
         chunk_size = 32
         hop_size = 16
         # チャンクをスライディングウィンドウで分割
@@ -77,16 +79,11 @@ for csv_file in csv_files:
         if len(data_list) % hop_size != 0:
             chunk = data_list[-chunk_size:]
             while len(chunk) < chunk_size:
-                chunk.append((35, 3.0, 3.0, 3, 3, 3, 3))  # デフォルト値で埋める
+                chunk.append((35, 3.0, 3.0, 3, 3, 3, 3))
             chunks.append(chunk)
 
-
-
-
-    # 各チャンクをNumPyのstructured arrayに変換
-    segments_array = np.array(chunks, dtype=dtype)
-
     # 辞書に格納（ファイル名からキーを生成）
+    segments_array = np.array(chunks, dtype=dtype)
     key = f"\\{csv_file.split('.')[0]}"
     pickle_data[key] = {
         'segments': segments_array,

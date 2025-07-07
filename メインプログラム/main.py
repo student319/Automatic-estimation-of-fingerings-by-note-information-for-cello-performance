@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Implementation code for proposed model in "Semi-supervised Violin Finger Generation Using Variational Autoencoders" by Vincent K.M. Cheung, Hsuan-Kai Kao, and Li Su in Proc. of the 22nd Int. Society for Music Information Retrieval Conf., Online, 2021.
+This code references the implementation code for proposed model in "Semi-supervised Violin Finger Generation Using Variational Autoencoders" by Vincent K.M. Cheung, Hsuan-Kai Kao, and Li Su in Proc. of the 22nd Int. Society for Music Information Retrieval Conf., Online, 2021.
 
 """
 
@@ -14,15 +14,10 @@ import tensorflow as tf
 import numpy as np
 import random as python_random
 from tensorflow.keras import regularizers
-
-import copy
-import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 from tensorflow.keras.utils import custom_object_scope
-import time
+import copy
 
-
-
+#GPU Settings
 gpu_devices = tf.config.experimental.list_physical_devices("GPU")
 for device in gpu_devices:
     tf.config.experimental.set_memory_growth(device, True)
@@ -76,8 +71,7 @@ n_position = 12
 n_finger = 5
 n_spf = 240+1 #4*12*5+1 but 133 in dataset, extra to handle new data
 
-all_time = []
-pretrain_needed = 0
+pretrain_needed = 1
 
 if (pretrain_needed == 1):
     #%% Joint (string,position,finger) dictionary 
@@ -95,7 +89,7 @@ if (pretrain_needed == 1):
     spf_inv_unique = np.concatenate(([0], spf))
     spf_inv_dict = {k : spf_inv_unique[k] for k in range(len(spf_inv_unique))}
 
-    # トレーニングパラメータとベストモデルの追跡用
+    # Tracking the parameters to save the best model
     best_accuracy = 0
     best_embedder = None
     best_encoder = None
@@ -180,7 +174,6 @@ if (pretrain_needed == 1):
         return output
 
 
-    #default : 14
     size = 14
     #%% For loop
     fix_unlabelled = 1 #!!!!!! use the same 6 unlabelled songs
@@ -337,8 +330,6 @@ if (pretrain_needed == 1):
             
             
             print("\nBegin training...")
-            # Measure pre-training time
-            start_time = time.time()
 
 
             #### Labelled data only
@@ -366,10 +357,10 @@ if (pretrain_needed == 1):
                 M2 = M2l     
             
 
-            # バリデーション精度を取得（最後のエポックのval_classifier_accuracy）
+            # Checking the validation accuracy for best epoch
             validation_accuracy = history.history['val_classifier_accuracy'][-11]
 
-            # 最も高いバリデーション精度を持つモデルを保存
+            # Save the best model
             if validation_accuracy > best_accuracy:
                 best_accuracy = validation_accuracy
                 best_embedder = copy.deepcopy(embedder)
@@ -380,9 +371,6 @@ if (pretrain_needed == 1):
                 best_M2l = copy.deepcopy(M2l)
 
             print("End training")
-            time.sleep(2)  # Simulating training time
-            pretrain_time = time.time() - start_time
-            all_time.append(pretrain_time)
         
     #%% clear and delete
             keras.backend.clear_session()
@@ -414,22 +402,7 @@ if (pretrain_needed == 1):
         best_classifier.save(model_name + '_cla.h5')
         #np.save(model_name+'.npy',history.history)
         print("Saved\n")
-        #exit()
 
-    output_file = 'review/training_time.txt'
-
-    # Calculate max, min, and average times
-    max_time = max(all_time)
-    min_time = min(all_time)
-    avg_time = np.mean(all_time)
-
-    # Save results to text file
-    with open(output_file, 'w') as f:
-        for i in range(len(all_time)):
-                f.write(f"Iteration {i+1}: {all_time[i]:.2f} seconds\n")
-        f.write(f"Max time: {max_time:.2f} seconds\n")
-        f.write(f"Min time: {min_time:.2f} seconds\n")
-        f.write(f"Average time: {avg_time:.2f} seconds\n")
 
 ###transfer learning
 #dataset prepare
@@ -444,7 +417,8 @@ testing_corpus = {k: v for k, v in testing_full.items()}
 n_string = 4
 n_position = 26
 n_finger = 6
-n_spf = 1248+1 #4*12*5+1 but 133 in dataset, extra to handle new data
+n_spf = 1248+1
+
 #%% Joint (string,position,finger) dictionary 
 tspf = np.zeros(1248)
 ct = 0 
@@ -464,14 +438,12 @@ tspf_dict = {tspf_unique[k] : tspf_list[k] for k in range(len(tspf_unique))}
 tspf_inv_unique = np.concatenate(([0], tspf))
 tspf_inv_dict = {k : tspf_inv_unique[k] for k in range(len(tspf_inv_unique))}
 
+#load best model
 with custom_object_scope({'KLDivergenceLayer': KLDivergenceLayer, 'Sampling': Sampling}):
     best_encoder = keras.models.load_model("bestmodel_enc.h5")
 best_blstm = keras.models.load_model("bestmodel_bls.h5")
 best_embedder = keras.models.load_model("bestmodel_emb.h5")
 
-all_results = []
-movement_results = []  # 移動距離と移動回数の結果を保存
-all_trans_time = []
 
 #%% Divide data into test and training sets
 def t_make_data(training_corpus, training_key_list, validation_split=0):
@@ -499,7 +471,7 @@ def t_make_data(training_corpus, training_key_list, validation_split=0):
 
     midiinfo = Xtrain['pitch'][training_index,:] - 35
     start_list = np.array([start_dict.get(int(val * 256), -1) for val in Xtrain['start'].flatten()])
-    start_list = start_list.reshape(Xtrain['start'].shape)  # 元の形状に戻す
+    start_list = start_list.reshape(Xtrain['start'].shape)
     
     # training data
     training_data = [Xtrain['pitch'][training_index,:] - 35, #minus 54 because 0 is invalid
@@ -510,9 +482,6 @@ def t_make_data(training_corpus, training_key_list, validation_split=0):
                       keras.utils.to_categorical(np.vectorize(start_dict.__getitem__)(np.array(Xtrain['start'][training_index,:]*256, dtype='int')), n_start),
                       keras.utils.to_categorical(np.vectorize(duration_dict.__getitem__)(np.array(Xtrain['duration'][training_index,:]*256, dtype='int')), n_duration), 
                       ]
-    print("spft values:", spft[training_index, :])
-    print("tspf_dict keys:", list(tspf_dict.keys())[:10])  # 最初の10個を表示
-
     training_classifier_labels = keras.utils.to_categorical(np.vectorize(tspf_dict.__getitem__)(spft[training_index,:]), n_spf)
 
     
@@ -547,7 +516,6 @@ def t_make_data(training_corpus, training_key_list, validation_split=0):
     return output
 
 #train model
-# default 15
 t_size = 18
 fix_unlabelled = 1 #!!!!!! use the same 6 unlabelled songs
 for training_size in  [17]: #no unlabled training
@@ -663,7 +631,7 @@ for training_size in  [17]: #no unlabled training
         dec_out = [out_pitch, out_start, out_duration]
         decoder = keras.Model(dec_in,dec_out, name="decoder")
         
-
+        #freeze the previous training layers
         for layer in best_embedder.layers:
             layer.trainable = False
         for layer in best_blstm.layers:
@@ -671,7 +639,7 @@ for training_size in  [17]: #no unlabled training
         for layer in best_encoder.layers:
             layer.trainable = False
 
-        #%% Make model for labelled data  ※これだと元モデルのloadができていないので要改良      
+        #%% Make model for labelled data    
         # Inputs - labelled
         in_lpitch = keras.Input(shape=(seq_len,), name='lpitch')  
         in_lstart = keras.Input(shape=(seq_len,), name='lstart')
@@ -683,7 +651,7 @@ for training_size in  [17]: #no unlabled training
         blstm_l = best_blstm(embedded_l)
         encoded_l = best_encoder(embedded_l)
         classified_l = classifier(blstm_l)
-        decoded_l = decoder([encoded_l, classified_l]) #入力が1249次元に対応していない（241次元）ため作り直し
+        decoded_l = decoder([encoded_l, classified_l])
 
         tM2l = keras.Model(emb_inl, [decoded_l, classified_l], name='labelled')
         #tM2l = keras.Model(emb_inl, classified_l, name='labelled')
@@ -707,7 +675,6 @@ for training_size in  [17]: #no unlabled training
         opt = tf.keras.optimizers.Adam(learning_rate=lr_schedule, clipnorm=0.001)
 
         print("\nBegin training...")
-        start_time = time.time()
         
 
         #### Labelled data only
@@ -739,321 +706,19 @@ for training_size in  [17]: #no unlabled training
             tM2 = tM2l
 
         print("End training")
-        time.sleep(1)  # Simulating training time
-        transfer_time = time.time() - start_time
-        all_trans_time.append(transfer_time)
-        #
-        Ts = t_make_data(testing_corpus, testing_key_list, validation_split =0)
 
-        # Embederを使用してデータを変換
-        embedded_data = best_embedder.predict(Ts.training_data[0:3])  # embedder
-
-        #BLSTM
-        in_cla_result = best_blstm.predict(embedded_data)
-
-        # エンコードされたデータで分類器の予測を実行
-        out_cla_result = classifier.predict(in_cla_result)
-
-        # 予測結果とラベルの比較（argmaxでラベルを取得）
-        y_pred = np.argmax(out_cla_result, axis=-1)
-        y_true = np.argmax(Ts.training_classifier_labels, axis=-1)
-
-        # validation_dataの pitch データを取得して、予測結果と比較
-        midi = Ts.midiinfo
-        array = midi.flatten()
-        validation_pitch = np.where(array == 0, array + 10, array)
-
-        print(y_true)
-        print(validation_pitch)
-
-        # データセット用のMIDI変換関数
-        string_midi_base = {1: 22, 2: 15, 3: 8, 4: 1} # -54されている
-        position_midi_offsets = {1: 1, 2: 2, 4: 3, 5: 4, 6: 5, 7: 6, 8: 7, 10: 8, 11: 9, 12: 10, 13: 11, 14: 12, 15: 13, 16: 14, 18: 15, 19: 16, 20: 17, 21: 18, 22: 19, 24: 20, 25: 21}
-        finger_midi_offsets = {0: 0, 1: 0, 2: 1, 3: 2, 4: 3, 9: -1}
-        expansion_midi_offsets = {0: 0, 1: 1}
-
-        # MIDIノートを生成する関数
-        def generate_midi_from_spf(string, position, finger, expansion):
-            #(string, position, finger)からMIDIノートを生成する
-            base_midi = string_midi_base.get(string, 0)  # 弦に基づくMIDIベース値
-            pos_offset = position_midi_offsets.get(position, 0)  # ポジションに基づくオフセット
-            finger_offset = finger_midi_offsets.get(finger, 0)  # 指に基づくオフセット
-            expansion_offset = expansion_midi_offsets.get(expansion, 0)  # 指に基づくオフセット
-            # fingerが0の場合はbase_midiを直接返し、それ以外の場合はオフセットを加える
-                # 親指 (finger == 9) の場合、特定の例外処理を適用
-            if finger == 9:
-                # 親指の場合、0 から -6 の範囲で可能なMIDIノートを返す
-                midi_values = [base_midi + pos_offset + offset + expansion_offset for offset in range(-6, 1)]
-                return midi_values  # リストで返す
-            elif finger == 0:
-                return [base_midi]
-            else:
-                # 通常の指の場合、単一のMIDI値を返す
-                return [base_midi + pos_offset + finger_offset + expansion_offset]
+        #%%Save model              
+        model_name = 'TransferLearningModel'+str(tekl)
         
-        def get_spf_combination(index):
-            #240個のspf配列から (string, position, finger) を取得する
-            value = tspf[index-1]  # インデックスから整数を取得
-            string = value // 10000  # 弦 (string)
-            position = (value % 10000) // 100  # ポジション (position)
-            finger = (value % 100) // 10  # 指 (finger)
-            expansion = value % 10
-            return string, position, finger, expansion
+        if savemodel:
+            print("\nSaving models...")
+            embedder.save(model_name + '_emb.h5')
+            encoder.save(model_name + '_enc.h5')
+            decoder.save(model_name + '_dec.h5')
+            classifier.save(model_name + '_cla.h5')
+            #np.save(model_name+'.npy',history.history)
+            print("Saved\n")
 
-        # 予測と正解の (string, position, finger) を取得
-        y_pred_spf = [get_spf_combination(idx) for idx in y_pred.flatten()]
-        y_true_spf = [get_spf_combination(idx) for idx in y_true.flatten()]
-
-        output_file = f"review/bcompare_spf({str(tekl)}).txt"
-        # Write to a text file
-        with open(output_file, 'w') as f:
-            for index, (pred, true) in enumerate(zip(y_pred_spf, y_true_spf)):
-                f.write(f"Note {index + 1}:\n")
-                f.write(f"  Predicted SPF: {pred}\n")
-                f.write(f"  True SPF: {true}\n")
-                f.write("\n")
-
-        # 各 (string, position, finger) の組み合わせに基づくMIDIノートベクトルを生成
-        y_pred_midi = [generate_midi_from_spf(*tspf) for tspf in y_pred_spf]
-        y_true_midi = [generate_midi_from_spf(*tspf) for tspf in y_true_spf]
-
-        print(y_true_spf)
-        print(y_true_midi)
-        
-        # MIDIノートベクトルをnumpy配列に変換
-        #y_pred_midi_array = np.array(y_pred_midi)
-        #y_true_midi_array = np.array(y_true_midi)
-        """
-        def calculate_accuracy_with_tolerance(pred_midi, true_midi):
-            correct_predictions = np.sum(np.abs(pred_midi - true_midi) <= 0)
-            total_predictions = len(true_midi)
-            accuracy = correct_predictions / total_predictions
-            return accuracy
-        """
-        def calculate_accuracy_with_tolerance(pred_midi, true_midi):
-            """
-            誤差許容範囲を考慮した精度を計算。
-            
-            - pred_midi: 各予測に対して許容されるMIDI値のリストのリスト
-            - true_midi: 真のMIDI値の配列
-            """
-            correct_predictions = 0
-
-            for pred, true in zip(pred_midi, true_midi):
-                if true in pred:  # 真のMIDI値が許容される予測値リスト内にある場合
-                    correct_predictions += 1
-
-            total_predictions = len(true_midi)
-            accuracy = correct_predictions / total_predictions
-            return accuracy
-        
-        # 各許容範囲での精度を計算
-        accuracy_exact = calculate_accuracy_with_tolerance(y_pred_midi, validation_pitch) #array削除
-        accuracy_exact_true = calculate_accuracy_with_tolerance(y_true_midi, validation_pitch)
-
-        # 結果の表示
-        print(f"Validation Pitch Accuracy (Exact Match): {accuracy_exact * 100:.2f}%")
-        print(f"Label Pitch Accuracy (Exact Match): {accuracy_exact * 100:.2f}%")
-
-        all_results.append(
-            {
-                "test_case": tekl,  # テストケースの名前
-                "accuracy_exact": accuracy_exact,  # MIDI精度 (Pred)
-                "accuracy_exact_true": accuracy_exact_true,  # MIDI精度 (True)
-            }
-        )
-
-
-        #pitch_differences = y_true_midi_array - validation_pitch
-        # 各MIDIリストから最適な値を選択（validation_pitch に最も近い値）
-        optimized_y_true_midi = [
-            min(midi_values, key=lambda x: abs(x - val_pitch))
-            for midi_values, val_pitch in zip(y_true_midi, validation_pitch)
-        ]
-
-        # Pitch differences を計算
-        pitch_differences = np.array(optimized_y_true_midi) - np.array(validation_pitch)
-
-        # Plot the histogram of pitch differences
-        plt.figure(figsize=(10, 6))
-        plt.hist(pitch_differences, bins=20, edgecolor='black')
-        plt.xlabel("Difference between Label and Validation Pitch (MIDI)")
-        plt.ylabel("Frequency")
-        plt.title("Distribution of Pitch Differences")
-
-        # Save the plot as a PNG file for easy viewing in Visual Studio
-        output_path = f"review/true({str(tekl)}).png"
-        plt.savefig(output_path)
-
-        #pitch_differences = y_pred_midi_array - validation_pitch
-        # 各MIDIリストから最適な値を選択（validation_pitch に最も近い値）
-        optimized_y_pred_midi = [
-            min(midi_values, key=lambda x: abs(x - val_pitch))
-            for midi_values, val_pitch in zip(y_pred_midi, validation_pitch)
-        ]
-
-        # Pitch differences を計算
-        pitch_differences = np.array(optimized_y_pred_midi) - np.array(validation_pitch)
-
-        # Plot the histogram of pitch differences
-        plt.figure(figsize=(10, 6))
-        plt.hist(pitch_differences, bins=20, edgecolor='black')
-        plt.xlabel("Difference between Predicted and Validation Pitch (MIDI)")
-        plt.ylabel("Frequency")
-        plt.title("Distribution of Pitch Differences")
-
-        # Save the plot as a PNG file for easy viewing in Visual Studio
-        output_path = f"review/pred({str(tekl)}).png"
-        plt.savefig(output_path)
-
-        # 差の絶対値が5以上のインデックスを取得
-        large_difference_indices = np.where(np.abs(pitch_differences) >= 1)[0]
-
-        # Attempting to save the large pitch differences as a text file without using pandas
-
-        # Construct the output content with relevant information
-        output_content = "Index, Predicted_MIDI, Validation_Pitch, Difference\n"
-        for idx in large_difference_indices:
-            output_content += f"{idx}, {optimized_y_pred_midi[idx]}, {validation_pitch[idx]}, {pitch_differences[idx]}\n"
-
-        # Save the content to a .txt file for easy viewing in Visual Studio Code
-        output_path = f"review/txt({str(tekl)}).txt"
-        with open(output_path, "w") as file:
-            file.write(output_content)
-
-        #distance
-        y_pred_position = [x[1] for x in y_pred_spf]
-        y_true_position = [x[1] for x in y_true_spf]
-
-        def calculate_total_movement_distance_and_count(positions):
-            
-            #各ポジション間の手の移動距離と移動回数を計算します。
-            
-            #Parameters:
-            #positions (list of int): 曲全体のポジションのシーケンス。
-            
-            #Returns:
-            #tuple: (総移動距離, 移動回数) のタプル。
-            
-            # 各ポジションでの弦の長さを計算するための辞書
-            n_values = [1, 2, 4, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 18, 19, 20, 21, 22, 24, 25]
-            position_lengths = {n: 33 * (1 / 1.059) ** n for n in n_values}
-
-            # 移動距離と移動回数を初期化
-            total_movement_distance = 0
-            movement_count = 0
-            previous_position_length = None
-
-            for position in positions:
-                # 現在のポジションの弦の長さを取得
-                if position in position_lengths:
-                    current_position_length = position_lengths[position]
-                    
-                    # 初回以降に移動距離と移動回数をカウント
-                    if previous_position_length is not None:
-                        movement_distance = abs(previous_position_length - current_position_length)
-                        if movement_distance > 0:  # 移動があった場合のみカウント
-                            total_movement_distance += movement_distance
-                            movement_count += 1
-                    
-                    # 現在のポジション長を次の比較用に更新
-                    previous_position_length = current_position_length
-
-            return total_movement_distance, movement_count
-        
-        def calculate_movement_per_bar_with_transition(start, positions):
-            """
-            小節ごとに移動距離と回数を計算し、区切り位置間の移動を次の小節に含める。
-
-            Parameters:
-            - start: ndarray, 小節の区切りを表すタイムスタンプ。
-            - positions: ndarray, 各タイムステップでのポジション。
-
-            Returns:
-            - bar_distances: 各小節の総移動距離のリスト。
-            - bar_counts: 各小節の移動回数のリスト。
-            """
-            # 小節の境界を正しく検出
-            bar_boundaries = [0]  # 先頭を追加
-            for i in range(1, len(start)):
-                if start[i] < start[i - 1]:  # 小節の切り替わり（減少を検出）
-                    bar_boundaries.append(i)
-            bar_boundaries.append(len(start))  # 末尾を追加
-
-            bar_distances = []
-            bar_counts = []
-
-            # 各小節について計算
-            for i in range(len(bar_boundaries) - 1):
-                start_idx = bar_boundaries[i]
-                end_idx = bar_boundaries[i + 1]
-
-                # 次の小節への移動を考慮
-                if end_idx < len(positions):
-                    end_idx += 1  # 次の小節開始位置の移動を含める
-
-                bar_positions = positions[start_idx:end_idx]
-
-                # 移動距離と回数を計算
-                total_distance, movement_count = calculate_total_movement_distance_and_count(bar_positions)
-                bar_distances.append(total_distance)
-                bar_counts.append(movement_count)
-
-            return bar_distances, bar_counts
-
-
-        
-        pred_distance, pred_movements = calculate_total_movement_distance_and_count(y_pred_position)
-        print(f"Total hand movement distance(pred): {pred_distance}")
-        print(f"Total hand movement count: {pred_movements}")
-        true_distance, true_movements = calculate_total_movement_distance_and_count(y_true_position)
-        print(f"Total hand movement distance(true): {true_distance}")
-        print(f"Total hand movement count: {true_movements}")
-
-        movement_results.append(
-            {
-                "test_case": tekl,  # テストケースの名前
-                "distance_true": true_distance,  # 総移動距離（True）
-                "distance_pred": pred_distance,  # 総移動距離（Pred）
-                "count_true": true_movements,  # 総移動回数（True）
-                "count_pred": pred_movements,  # 総移動回数（Pred）
-            }
-        )
-
-        start = Ts.start.flatten()
-        start = start[start != 31]
-        print(start)
-        # 小節ごとの計算
-        true_bar_distances, true_bar_counts = calculate_movement_per_bar_with_transition(start, y_true_position)
-        pred_bar_distances, pred_bar_counts = calculate_movement_per_bar_with_transition(start, y_pred_position)
-
-        # 移動距離の折れ線グラフ
-        plt.figure(figsize=(12, 6))
-        plt.plot(range(1, len(true_bar_distances) + 1), true_bar_distances, label="True Movements", marker='o')
-        plt.plot(range(1, len(pred_bar_distances) + 1), pred_bar_distances, label="Predicted Movements", marker='o')
-        # plt.title("Hand Movement Distance per Bar")
-        plt.xlabel("Bar Number")
-        plt.ylabel("Movement Distance（cm）")
-        plt.legend()
-        plt.grid(True)
-        plt.xticks(range(1, len(true_bar_distances) + 1))  # 小節番号を1から開始
-        output_path = f"review/dist({str(tekl)}).png"
-        plt.savefig(output_path)
-
-        # 移動回数の折れ線グラフ
-        plt.figure(figsize=(12, 6))
-        plt.plot(range(1, len(true_bar_counts) + 1), true_bar_counts, label="True Movements", marker='o')
-        plt.plot(range(1, len(pred_bar_counts) + 1), pred_bar_counts, label="Predicted Movements", marker='o')
-        # plt.title("Hand Movement Count per Bar")
-        plt.xlabel("Bar Number")
-        plt.ylabel("Movement Count")
-        plt.legend()
-        plt.xticks(range(1, len(true_bar_counts) + 1))  # 小節番号を1から開始
-        plt.gca().yaxis.set_major_locator(ticker.MaxNLocator(integer=True))  # 縦軸を整数のみ表示
-        output_path = f"review/ct({str(tekl)}).png"
-        plt.savefig(output_path)
-
-    
 #%% clear and delete
         keras.backend.clear_session()
         print('session cleared')      
@@ -1070,200 +735,3 @@ for training_size in  [17]: #no unlabled training
             print('deleted La')
         except:
             print('no La to delete')
-
-
-#評価の統計
-# 精度データを抽出
-accuracy_pred = [result["accuracy_exact"] for result in all_results]
-
-# 箱ひげ図をプロット
-plt.figure(figsize=(10, 6))
-plt.boxplot(
-    accuracy_pred,
-    patch_artist=True,
-    boxprops=dict(facecolor="lightblue", color="blue"),
-    medianprops=dict(color="red"),
-    vert=True,  # 縦方向に描画
-    labels=["Predicted Accuracy"]  # ラベル
-)
-plt.title("Boxplot of Predicted Accuracy")
-plt.ylabel("Accuracy")
-plt.grid(True, linestyle='--', alpha=0.7)
-plt.tight_layout()
-plt.savefig("review/accuracy_boxplot.png")
-
-# グラフ生成用データの抽出
-test_cases = [result["test_case"] for result in all_results]
-accuracy_pred = [result["accuracy_exact"] for result in all_results]
-accuracy_true = [result["accuracy_exact_true"] for result in all_results]
-
-
-bar_width = 0.35
-index = np.arange(len(test_cases))
-
-plt.figure(figsize=(12, 6))
-plt.bar(index, accuracy_pred, bar_width, color='orange')
-
-plt.xlabel('Test Case')
-plt.ylabel('Accuracy')
-# plt.title('MIDI Accuracy Comparison')
-plt.xticks(index, test_cases, rotation=45, ha='right')
-plt.grid(True)
-plt.tight_layout()
-plt.savefig("review/midi_accuracy_bar.png")
-
-np.savetxt("review/accuracy_pred.txt", accuracy_pred, fmt="%.4f")
-
-# データ抽出
-test_cases = [result["test_case"] for result in movement_results]
-distance_true = [result["distance_true"] for result in movement_results]
-distance_pred = [result["distance_pred"] for result in movement_results]
-count_true = [result["count_true"] for result in movement_results]
-count_pred = [result["count_pred"] for result in movement_results]
-
-# 棒グラフの設定
-bar_width = 0.35
-index = np.arange(len(test_cases))
-
-# 1. 移動距離の棒グラフ
-plt.figure(figsize=(12, 6))
-plt.bar(index, distance_true, bar_width, label='True Distance', color='blue')
-plt.bar(index + bar_width, distance_pred, bar_width, label='Predicted Distance', color='orange')
-
-plt.xlabel('Test Case')
-plt.ylabel('Total Movement Distance')
-plt.title('Total Movement Distance Comparison')
-plt.xticks(index + bar_width / 2, test_cases, rotation=45, ha='right')
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-plt.savefig("review/movement_distance_bar.png")
-
-# 2. 移動回数の棒グラフ
-plt.figure(figsize=(12, 6))
-plt.bar(index, count_true, bar_width, label='True Movement Count', color='blue')
-plt.bar(index + bar_width, count_pred, bar_width, label='Predicted Movement Count', color='orange')
-
-plt.xlabel('Test Case')
-plt.ylabel('Total Movement Count')
-plt.title('Total Movement Count Comparison')
-plt.xticks(index + bar_width / 2, test_cases, rotation=45, ha='right')
-plt.legend()
-plt.grid(True)
-plt.tight_layout()
-plt.savefig("review/movement_count_bar.png")
-
-
-# 1. 移動距離の箱ひげ図
-plt.figure(figsize=(10, 6))
-plt.boxplot(
-    [distance_true, distance_pred],
-    sym='',
-    labels=["True Distance", "Predicted Distance"],
-    patch_artist=True,
-    boxprops=dict(facecolor="lightblue", color="blue"),
-    medianprops=dict(color="red"),
-)
-plt.title("Boxplot of Total Movement Distance")
-plt.ylabel("Distance")
-plt.grid(True)
-plt.tight_layout()
-plt.savefig("review/movement_distance_boxplot.png")
-
-# 2. 移動回数の箱ひげ図
-plt.figure(figsize=(10, 6))
-plt.boxplot(
-    [count_true, count_pred],
-    sym='',
-    labels=["True Movement Count", "Predicted Movement Count"],
-    patch_artist=True,
-    boxprops=dict(facecolor="lightgreen", color="green"),
-    medianprops=dict(color="red"),
-)
-plt.title("Boxplot of Total Movement Count")
-plt.ylabel("Count")
-plt.grid(True)
-plt.tight_layout()
-plt.savefig("review/movement_count_boxplot.png")
-
-# サンプルデータ
-accuracy_pred = [result["accuracy_exact"] for result in all_results]  # MIDI一致率
-
-# 距離の比率 (distance_pred / distance_true) を計算
-distance_ratios = [
-    result["distance_pred"] / result["distance_true"]
-    for result in movement_results
-    if result["distance_true"] != 0  # 0 の場合を除外
-]
-
-# 回数の比率 (count_pred / count_true) を計算
-count_ratios = [
-    result["count_pred"] / result["count_true"]
-    for result in movement_results
-    if result["count_true"] != 0  # 0 の場合を除外
-]
-
-# 統計量を計算する関数
-def calculate_statistics(data):
-    """
-    データの統計量を計算
-    """
-    return {
-        "mean": np.mean(data),
-        "median": np.median(data),
-        "q1": np.percentile(data, 25),
-        "q3": np.percentile(data, 75),
-        "max": np.max(data),
-        "min": np.min(data)
-    }
-
-# 統計量の計算
-accuracy_stats = calculate_statistics(accuracy_pred)
-distance_ratio_stats = calculate_statistics(distance_ratios)
-count_ratio_stats = calculate_statistics(count_ratios)
-
-# 結果をテキストファイルに保存
-output_path = "review/statistics_summary.txt"
-with open(output_path, "w") as f:
-    f.write("=== MIDI 一致率の統計量 ===\n")
-    f.write(f"平均値: {accuracy_stats['mean']:.4f}\n")
-    f.write(f"中央値: {accuracy_stats['median']:.4f}\n")
-    f.write(f"第1四分位数: {accuracy_stats['q1']:.4f}\n")
-    f.write(f"第3四分位数: {accuracy_stats['q3']:.4f}\n")
-    f.write(f"最大値: {accuracy_stats['max']:.4f}\n")
-    f.write(f"最小値: {accuracy_stats['min']:.4f}\n")
-    f.write("\n")
-
-    f.write("=== 距離の比率 (Pred / True) の統計量 ===\n")
-    f.write(f"平均値: {distance_ratio_stats['mean']:.4f}\n")
-    f.write(f"中央値: {distance_ratio_stats['median']:.4f}\n")
-    f.write(f"第1四分位数: {distance_ratio_stats['q1']:.4f}\n")
-    f.write(f"第3四分位数: {distance_ratio_stats['q3']:.4f}\n")
-    f.write(f"最大値: {distance_ratio_stats['max']:.4f}\n")
-    f.write(f"最小値: {distance_ratio_stats['min']:.4f}\n")
-    f.write("\n")
-
-    f.write("=== 回数の比率 (Pred / True) の統計量 ===\n")
-    f.write(f"平均値: {count_ratio_stats['mean']:.4f}\n")
-    f.write(f"中央値: {count_ratio_stats['median']:.4f}\n")
-    f.write(f"第1四分位数: {count_ratio_stats['q1']:.4f}\n")
-    f.write(f"第3四分位数: {count_ratio_stats['q3']:.4f}\n")
-    f.write(f"最大値: {count_ratio_stats['max']:.4f}\n")
-    f.write(f"最小値: {count_ratio_stats['min']:.4f}\n")
-
-print(f"統計情報を {output_path} に保存しました。")
-
-output_file = 'review/training_trans_time.txt'
-
-# Calculate max, min, and average times
-max_time = max(all_trans_time)
-min_time = min(all_trans_time)
-avg_time = np.mean(all_trans_time)
-
-# Save results to text file
-with open(output_file, 'w') as f:
-    for i in range(len(all_trans_time)):
-            f.write(f"Iteration {i+1}: {all_trans_time[i]:.2f} seconds\n")
-    f.write(f"Max time: {max_time:.2f} seconds\n")
-    f.write(f"Min time: {min_time:.2f} seconds\n")
-    f.write(f"Average time: {avg_time:.2f} seconds\n")

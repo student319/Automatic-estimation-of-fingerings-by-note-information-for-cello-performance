@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Implementation code for proposed model in "Semi-supervised Violin Finger Generation Using Variational Autoencoders" by Vincent K.M. Cheung, Hsuan-Kai Kao, and Li Su in Proc. of the 22nd Int. Society for Music Information Retrieval Conf., Online, 2021.
+Code below is modified from original code by "Semi-supervised Violin Finger Generation Using Variational Autoencoders" by Vincent K.M. Cheung, Hsuan-Kai Kao, and Li Su in Proc. of the 22nd Int. Society for Music Information Retrieval Conf., Online, 2021.
 
 Code below is based on implementation from https://github.com/Tsung-Ping/Violin-Fingering-Generation , "Positioning Left-hand Movement in Violin Performance: A System and User Study of Fingering Pattern Generation" (IUI 2021)
 
@@ -60,6 +60,7 @@ def split_data(corpus, key_list):
                    }}       
     return X, Y    
 
+#for transfer learning
 def t_split_data(corpus, key_list):
     training_data = [v for k, v in corpus.items() if k in key_list]
     testing_data = [v for k, v in corpus.items() if k not in key_list]
