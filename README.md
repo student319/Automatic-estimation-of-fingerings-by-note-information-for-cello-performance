@@ -39,16 +39,11 @@ project-root/
 - 転移学習・評価用：デュポール　チェロ奏法と21の練習曲[3]に基づき自作したデータセット
 
 
-## セットアップ
+## セットアップ・実行
 
 ```bash  
 git clone https://github.com/student319/Automatic-estimation-of-fingerings-by-note-information-for-cello-performance.git  
-cd プログラム
-```
-
-## 実行方法  
-
-```bash
+cd program
 python main.py
 ```
 
