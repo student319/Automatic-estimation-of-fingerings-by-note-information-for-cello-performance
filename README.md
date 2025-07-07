@@ -1,7 +1,7 @@
 # チェロ演奏のための音符情報による運指の自動推定
 
 本リポジトリは、チェロ演奏における最適な運指を楽譜情報から自動推定する深層学習モデルの実装を公開したものです。
-ヴァイオリンの運指パターンで事前学習を行い、それを転移学習・ファインチューニングすることでチェロへの適用を図っています。
+関連研究[1]ヴァイオリンの運指パターンで事前学習を行い、それを転移学習・ファインチューニングすることでチェロへの適用を図っています。
 本研究成果は、2025年5月に開催された「**電子情報通信学会 イメージ・メディア・クオリティ研究会（IEICE-IMQ）**」にて発表を行いました。
 
 ## 概要
@@ -22,13 +22,21 @@
 ## ディレクトリ構成
 
 project-root/  
-│  
+  
 ├── dataset/ # データセット（TNUA, Celloデータ）  
+ ├── main.py  
+ ├── custom_layers.py  
+ └── dataset_prepare.py  
 ├── program/ # モデル定義・学習スクリプトなど  
-│ ├── main.py  
-│ ├── custom_layers.py  
-│ └── dataset_prepare.py  
+ ├── main.py  
+ ├── custom_layers.py  
+ └── dataset_prepare.py  
 └── README.md  
+
+## データセット
+
+- 事前学習用：TNUA Violin Fingering Dataset[2]
+- 転移学習・評価用：デュポール　チェロ奏法と21の練習曲[3]に基づき自作したデータセット
 
 
 ## セットアップ
@@ -44,11 +52,6 @@ cd プログラム
 python main.py
 ```
 
-## データセット
-
-- 事前学習用：TNUA Violin Fingering Dataset
-- 転移学習・評価用：デュポール「チェロ奏法と21の練習曲」に基づき自作したデータセット
-
 
 ## 学会発表：  
 [IEICE-IMQ 研究会 プログラム（2025年5月）](https://ken.ieice.org/ken/program/index.php?tgs_regid=29051ffd263895bed9d2b9d591ba66c06956421ef30b5393bfa12d1b707d3f7a&tgid=IEICE-IMQ)
@@ -56,12 +59,8 @@ python main.py
 
 ## 引用・参考文献
 
-Cheung et al. “Semi-supervised violin fingering generation using variational autoencoders,” ISMIR, 2021.
+[1] Cheung et al. “Semi-supervised violin fingering generation using variational autoencoders,” ISMIR, 2021.
 
-TensorFlow: Transfer Learning and Fine-Tuning
+[2] TNUA
 
-Sheet Music Scanner: https://sheetmusicscanner.com
-
-MuseScore: https://musescore.org/ja
-
-デュポール「チェロ奏法と21の練習曲」音楽之友社, 2024.
+[3] デュポール「チェロ奏法と21の練習曲」音楽之友社, 2024.
