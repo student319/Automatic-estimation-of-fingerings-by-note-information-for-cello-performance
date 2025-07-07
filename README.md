@@ -1,19 +1,19 @@
-# Automatic Estimation of Fingering by Note Information for Cello Performance
+# チェロ演奏のための音符情報による運指の自動推定
 
-本リポジトリは、チェロ演奏における最適な運指を楽譜情報から自動推定する深層学習モデルの実装を公開したものです。  
+本リポジトリは、チェロ演奏における最適な運指を楽譜情報から自動推定する深層学習モデルの実装を公開したものです。
 ヴァイオリンの運指パターンで事前学習を行い、それを転移学習・ファインチューニングすることでチェロへの適用を図っています。
 本研究成果は、2025年5月に開催された「**電子情報通信学会 イメージ・メディア・クオリティ研究会（IEICE-IMQ）**」にて発表を行いました。
 
 ## 概要
 
 - 音符のMIDI情報（音高・開始時刻・継続時間）を入力とし、弦・ポジション・指番号のラベルを推定
-- 4種類のモデルを実装・比較
+- 4種類のモデルを実装・比較（本リポジトリでは(a)のみ公開されています）
   - (a) 転移学習モデル
   - (b) 簡約モデル（エンコーダ・デコーダなし）
   - (c) ファインチューニングモデル
   - (d) 深層学習モデル（事前学習なし）
 
-## 使用技術
+## Requirements
 
 - Python 3.10.12
 - TensorFlow 2.17.0
@@ -23,25 +23,19 @@
 
 project-root/  
 │  
-├── data/ # データセット（TNUA, Celloデータ）  
-├── models/ # 学習済みモデルの保存先  
-├── notebooks/ # 実験用ノートブック  
-├── src/ # モデル定義・学習スクリプトなど  
-│ ├── model.py  
-│ ├── train.py  
-│ └── utils.py  
-├── results/ # 実験結果・グラフ・出力など  
-├── main.py # 実行ファイル  
-├── requirements.txt # 必要ライブラリ  
+├── dataset/ # データセット（TNUA, Celloデータ）  
+├── program/ # モデル定義・学習スクリプトなど  
+│ ├── main.py  
+│ ├── custom_layers.py  
+│ └── dataset_prepare.py  
 └── README.md  
 
 
 ## セットアップ
 
 ```bash  
-git clone https://github.com/your-username/cello-fingering-estimation.git  
-cd cello-fingering-estimation  
-pip install -r requirements.txt
+git clone https://github.com/student319/Automatic-estimation-of-fingerings-by-note-information-for-cello-performance.git  
+cd プログラム
 ```
 
 ## 実行方法  
