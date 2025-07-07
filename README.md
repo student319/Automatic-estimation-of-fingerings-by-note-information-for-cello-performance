@@ -23,14 +23,14 @@
 
 project-root/  
   
-├── dataset/ # データセット（TNUA, Celloデータ）  
- ├── main.py  
- ├── custom_layers.py  
- └── dataset_prepare.py  
-├── program/ # モデル定義・学習スクリプトなど  
- ├── main.py  
- ├── custom_layers.py  
- └── dataset_prepare.py  
+├── dataset/ # データセットおよびファイル形式変換コード  
+&nbsp;&nbsp; ├── tocsv.py # musicXML -> csv  
+&nbsp;&nbsp; ├── make_pickle.py # csv -> pickle  
+&nbsp;&nbsp; └── データセット（csv）  # チェロ用の自作データセット  
+├── program/ # ソースコード  
+&nbsp;&nbsp; ├── main.py # 実行ファイル  
+&nbsp;&nbsp; ├── custom_layers.py # カスタム層の定義  
+&nbsp;&nbsp; └── dataset_prepare.py # データ前処理  
 └── README.md  
 
 ## データセット
@@ -59,8 +59,8 @@ python main.py
 
 ## 引用・参考文献
 
-[1] Cheung et al. “Semi-supervised violin fingering generation using variational autoencoders,” ISMIR, 2021.
+[1] Vincent KM Cheung, Hsuan-Kai Kao, Li Su, et al. Semi-supervised violin finger ing generation using variational autoencoders. In ISMIR, pages 113–120,
 
-[2] TNUA
+[2] Yi-Hsin Jen, Tsung-Ping Chen, Shih-Wei Sun, and Li Su. Positioning left-hand movement in violin performance: A system and user study of fingering pattern generation. In Proceedings of the 26th International Conference on Intelligent User Interfaces, pages 208–212, 2021.
 
-[3] デュポール「チェロ奏法と21の練習曲」音楽之友社, 2024.
+[3] デュポール. チェロ奏法と 21 の練習曲 運指・運弓 に 関 す る 試 論 と エ チ ュ ー ド ( 原 典 版/solo+bass). 音楽之友社, 2024.
