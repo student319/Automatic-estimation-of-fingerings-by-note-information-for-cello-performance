@@ -54,7 +54,7 @@ python main.py
 
 ## 引用・参考文献
 
-[1] Vincent KM Cheung, Hsuan-Kai Kao, Li Su, et al. Semi-supervised violin finger ing generation using variational autoencoders. In ISMIR, pages 113–120, 2021
+[1] Vincent KM Cheung, Hsuan-Kai Kao, Li Su, et al. Semi-supervised violin finger ing generation using variational autoencoders. In ISMIR, pages 113–120, 2021.
 
 [2] Yi-Hsin Jen, Tsung-Ping Chen, Shih-Wei Sun, and Li Su. Positioning left-hand movement in violin performance: A system and user study of fingering pattern generation. In Proceedings of the 26th International Conference on Intelligent User Interfaces, pages 208–212, 2021.
 
