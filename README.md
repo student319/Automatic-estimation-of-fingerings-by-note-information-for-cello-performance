@@ -1,7 +1,7 @@
 # チェロ演奏のための音符情報による運指の自動推定
 
 本リポジトリは、チェロ演奏における最適な運指を楽譜情報から自動推定する深層学習モデルの実装を公開したものです。
-関連研究[1]ヴァイオリンの運指パターンで事前学習を行い、それを転移学習・ファインチューニングすることでチェロへの適用を図っています。
+本研究は、Cheungらによるヴァイオリン運指推定の先行研究［1］を基に、ヴァイオリンの運指パターンで事前学習を行い、それを転移学習・ファインチューニングすることでチェロへの適用を図ったものです。
 本研究成果は、2025年5月に開催された「**電子情報通信学会 イメージ・メディア・クオリティ研究会（IEICE-IMQ）**」にて発表を行いました。
 
 ## 概要
@@ -23,14 +23,14 @@
 
 project-root/  
   
-├── dataset/ # データセットおよびファイル形式変換コード  
-&nbsp;&nbsp; ├── tocsv.py # musicXML -> csv  
-&nbsp;&nbsp; ├── make_pickle.py # csv -> pickle  
+├── dataset/　　　　　　　　　　　　　# データセットおよびファイル形式変換コード  
+&nbsp;&nbsp; ├── tocsv.py　　　　　　# musicXML -> csv  
+&nbsp;&nbsp; ├── make_pickle.py　　　# csv -> pickle  
 &nbsp;&nbsp; └── データセット（csv）  # チェロ用の自作データセット  
 ├── program/ # ソースコード  
-&nbsp;&nbsp; ├── main.py # 実行ファイル  
-&nbsp;&nbsp; ├── custom_layers.py # カスタム層の定義  
-&nbsp;&nbsp; └── dataset_prepare.py # データ前処理  
+&nbsp;&nbsp; ├── main.py　　　　　　　# 実行ファイル  
+&nbsp;&nbsp; ├── custom_layers.py　　# カスタム層の定義  
+&nbsp;&nbsp; └── dataset_prepare.py　# データ前処理  
 └── README.md  
 
 ## データセット
@@ -59,7 +59,7 @@ python main.py
 
 ## 引用・参考文献
 
-[1] Vincent KM Cheung, Hsuan-Kai Kao, Li Su, et al. Semi-supervised violin finger ing generation using variational autoencoders. In ISMIR, pages 113–120,
+[1] Vincent KM Cheung, Hsuan-Kai Kao, Li Su, et al. Semi-supervised violin finger ing generation using variational autoencoders. In ISMIR, pages 113–120, 2021
 
 [2] Yi-Hsin Jen, Tsung-Ping Chen, Shih-Wei Sun, and Li Su. Positioning left-hand movement in violin performance: A system and user study of fingering pattern generation. In Proceedings of the 26th International Conference on Intelligent User Interfaces, pages 208–212, 2021.
 
