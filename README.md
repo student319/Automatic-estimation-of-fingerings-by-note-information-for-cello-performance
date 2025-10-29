@@ -21,17 +21,18 @@
 
 ## ディレクトリ構成
 
-project-root/  
-  
-├── dataset/　　　　　　# データセットおよびファイル形式変換コード  
-&nbsp;&nbsp; ├── tocsv.py　　　　　　# musicXML -> csv  
-&nbsp;&nbsp; ├── make_pickle.py　　　# csv -> pickle  
-&nbsp;&nbsp; └── データセット（csv）  # チェロ用の自作データセット  
-├── program/　　　　　　# ソースコード  
-&nbsp;&nbsp; ├── main.py　　　　　　# 実行ファイル  
-&nbsp;&nbsp; ├── custom_layers.py　　# カスタム層の定義  
-&nbsp;&nbsp; └── dataset_prepare.py　# データ前処理  
-└── README.md  
+project-root/
+├── dataset/                  # データセットおよびファイル形式変換コード
+│   ├── tocsv.py              # musicXML → CSV
+│   ├── make_pickle.py        # CSV → pickle
+│   └── data/                 # チェロ用の自作データセット（CSV）
+│
+├── program/                  # ソースコード
+│   ├── main.py               # 実行ファイル
+│   ├── custom_layers.py      # カスタム層の定義
+│   └── dataset_prepare.py    # データ前処理
+│
+└── README.md
 
 ## データセット
 
@@ -52,7 +53,7 @@ python main.py
 [IEICE-IMQ 研究会 プログラム（2025年5月）](https://ken.ieice.org/ken/program/index.php?tgs_regid=29051ffd263895bed9d2b9d591ba66c06956421ef30b5393bfa12d1b707d3f7a&tgid=IEICE-IMQ)
 
 
-## 引用・参考文献
+## 参考文献
 
 [1] Vincent KM Cheung, Hsuan-Kai Kao, Li Su, et al. Semi-supervised violin finger ing generation using variational autoencoders. In ISMIR, pages 113–120, 2021.
 
