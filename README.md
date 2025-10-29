@@ -22,15 +22,15 @@
 ## ディレクトリ構成
 
 ・project-root/  
-　・dataset/ … データセットおよびファイル形式変換コード  
-　　・tocsv.py … MusicXML → CSV  
-　　・make_pickle.py … CSV → pickle  
-　　・data/ … チェロ用の自作データセット（CSV）  
-　・program/ … ソースコード  
-　　・main.py … 実行ファイル  
-　　・custom_layers.py … カスタム層の定義  
-　　・dataset_prepare.py … データ前処理  
-　・README.md  
+&nbsp;・dataset/ … データセットおよびファイル形式変換コード  
+&nbsp;&nbsp;・tocsv.py … MusicXML → CSV  
+&nbsp;&nbsp;・make_pickle.py … CSV → pickle  
+&nbsp;&nbsp;・data/ … チェロ用の自作データセット（CSV）  
+&nbsp;・program/ … ソースコード  
+&nbsp;&nbsp;・main.py … 実行ファイル  
+&nbsp;&nbsp;・custom_layers.py … カスタム層の定義  
+&nbsp;&nbsp;・dataset_prepare.py … データ前処理  
+&nbsp;・README.md  
 
 ## データセット
 
